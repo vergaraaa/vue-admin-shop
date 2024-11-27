@@ -594,4 +594,8 @@
   </section>
 </template>
 
-<script lang="ts" setup></script>
+<script lang="ts" setup>
+import { getProducts } from '@/modules/products/actions/get-products.action';
+
+getProducts();
+</script>
