@@ -96,15 +96,41 @@
 
   <!-- Product List -->
   <ProductsList v-else :products="products" />
+
+  <ButtonPagination :page="page" :has-more-data="!!products && products.length >= 10" />
 </template>
 
 <script lang="ts" setup>
-import { useQuery } from '@tanstack/vue-query';
+import { useRoute } from 'vue-router';
+import { ref, watch, watchEffect } from 'vue';
+import { useQuery, useQueryClient } from '@tanstack/vue-query';
+import ButtonPagination from '@/modules/common/ButtonPagination.vue';
 import ProductsList from '@/modules/products/components/ProductsList.vue';
 import { getProducts } from '@/modules/products/actions/get-products.action';
 
+const route = useRoute();
+const page = ref(Number(route.query.page || 1));
+
+const queryClient = useQueryClient();
+
 const { data: products } = useQuery({
-  queryKey: ['products', { page: 1 }],
-  queryFn: () => getProducts(),
+  queryKey: ['products', { page: page }],
+  queryFn: () => getProducts(page.value),
+});
+
+watch(
+  () => route.query.page,
+  (newPage) => {
+    page.value = Number(newPage || 1);
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  },
+);
+
+watchEffect(() => {
+  queryClient.prefetchQuery({
+    queryKey: ['products', { page: page.value + 1 }],
+    queryFn: () => getProducts(page.value + 1),
+  });
 });
 </script>
