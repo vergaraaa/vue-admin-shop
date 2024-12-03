@@ -4,17 +4,21 @@ import { defineStore } from 'pinia';
 import { loginAction } from '../actions/login.action';
 import type { User } from '../interfaces/user.interface';
 import { AuthStatus } from '../interfaces/auth-status.enum';
+import { useLocalStorage } from '@vueuse/core';
 
 export const useAuthStore = defineStore('auth', () => {
   const authStatus = ref<AuthStatus>(AuthStatus.Checking);
   const user = ref<User | undefined>();
-  const token = ref<string>('');
+  const token = ref(useLocalStorage('token', ''));
 
   const login = async (email: string, password: string) => {
     try {
       const loginResponse = await loginAction(email, password);
 
-      if (!loginResponse.ok) return false;
+      if (!loginResponse.ok) {
+        logout();
+        return false;
+      }
 
       user.value = loginResponse.user;
       token.value = loginResponse.token;
