@@ -1,10 +1,12 @@
 <template>
   <h1 class="text-2xl font-semibold mb-4">Register</h1>
-  <form action="#" method="POST">
-    <!-- Username Input -->
+  <form @submit.prevent="onRegister">
+    <!-- Name Input -->
     <div class="mb-4">
       <label for="name" class="block text-gray-600">Name</label>
       <input
+        ref="fullnameInputRef"
+        v-model="registerForm.fullname"
         type="text"
         id="name"
         name="name"
@@ -13,13 +15,15 @@
       />
     </div>
 
-    <!-- Username Input -->
+    <!-- Email Input -->
     <div class="mb-4">
-      <label for="username" class="block text-gray-600">Username</label>
+      <label for="email" class="block text-gray-600">Email</label>
       <input
-        type="text"
-        id="username"
-        name="username"
+        ref="emailInputRef"
+        v-model="registerForm.email"
+        type="email"
+        id="email"
+        name="email"
         class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:border-blue-500"
         autocomplete="off"
       />
@@ -28,6 +32,8 @@
     <div class="mb-4">
       <label for="password" class="block text-gray-600">Password</label>
       <input
+        ref="passwordInputRef"
+        v-model="registerForm.password"
         type="password"
         id="password"
         name="password"
@@ -35,21 +41,18 @@
         autocomplete="off"
       />
     </div>
-    <!-- Remember Me Checkbox -->
-    <div class="mb-4 flex items-center">
-      <input type="checkbox" id="remember" name="remember" class="text-blue-500" />
-      <label for="remember" class="text-gray-600 ml-2">Remember Me</label>
-    </div>
+
     <!-- Forgot Password Link -->
     <div class="mb-6 text-blue-500">
       <a href="#" class="hover:underline">Forgot Password?</a>
     </div>
-    <!-- Login Button -->
+
+    <!-- Register Button -->
     <button
       type="submit"
       class="bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-md py-2 px-4 w-full"
     >
-      Login
+      Create account
     </button>
   </form>
   <!-- Sign up  Link -->
@@ -57,3 +60,50 @@
     <RouterLink :to="{ name: 'login' }" class="hover:underline">Login Here</RouterLink>
   </div>
 </template>
+
+<script lang="ts" setup>
+import { reactive, ref } from 'vue';
+import { useToast } from 'vue-toastification';
+
+import { useAuthStore } from '../stores/auth.store';
+
+const toast = useToast();
+const authStore = useAuthStore();
+
+const fullnameInputRef = ref<HTMLInputElement | null>(null);
+const emailInputRef = ref<HTMLInputElement | null>(null);
+const passwordInputRef = ref<HTMLInputElement | null>(null);
+
+const registerForm = reactive({
+  fullname: '',
+  email: '',
+  password: '',
+});
+
+const onRegister = async () => {
+  if (registerForm.fullname === '') {
+    return fullnameInputRef.value?.focus();
+  }
+
+  if (registerForm.email === '') {
+    return emailInputRef.value?.focus();
+  }
+
+  if (registerForm.password.length < 6) {
+    return passwordInputRef.value?.focus();
+  }
+
+  const { ok, message } = await authStore.register(
+    registerForm.fullname,
+    registerForm.email,
+    registerForm.password,
+  );
+
+  if (!ok) {
+    toast.error(message);
+    return;
+  }
+
+  console.log({ ok });
+};
+</script>

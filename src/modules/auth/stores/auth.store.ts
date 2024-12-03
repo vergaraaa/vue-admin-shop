@@ -5,6 +5,7 @@ import { loginAction } from '../actions/login.action';
 import type { User } from '../interfaces/user.interface';
 import { AuthStatus } from '../interfaces/auth-status.enum';
 import { useLocalStorage } from '@vueuse/core';
+import { registerAction } from '../actions/register.action';
 
 export const useAuthStore = defineStore('auth', () => {
   const authStatus = ref<AuthStatus>(AuthStatus.Checking);
@@ -32,6 +33,26 @@ export const useAuthStore = defineStore('auth', () => {
     }
   };
 
+  const register = async (fullname: string, email: string, password: string) => {
+    try {
+      const registerResponse = await registerAction(fullname, email, password);
+
+      if (!registerResponse.ok) {
+        logout();
+        return { ok: false, message: registerResponse.message };
+      }
+
+      user.value = registerResponse.user;
+      token.value = registerResponse.token;
+      authStatus.value = AuthStatus.Authenticated;
+
+      return { ok: true };
+    } catch (error) {
+      console.log(error);
+      return { ok: false, message: 'Error on register' };
+    }
+  };
+
   const logout = () => {
     authStatus.value = AuthStatus.Unauthenticated;
     user.value = undefined;
@@ -55,5 +76,6 @@ export const useAuthStore = defineStore('auth', () => {
 
     // actions
     login,
+    register,
   };
 });

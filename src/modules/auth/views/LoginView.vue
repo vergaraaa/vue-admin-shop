@@ -62,9 +62,10 @@
 </template>
 
 <script lang="ts" setup>
-import { reactive, ref, watchEffect } from 'vue';
-import { useAuthStore } from '../stores/auth.store';
 import { useToast } from 'vue-toastification';
+import { reactive, ref, watchEffect } from 'vue';
+
+import { useAuthStore } from '../stores/auth.store';
 
 const toast = useToast();
 const authStore = useAuthStore();
