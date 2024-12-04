@@ -100,8 +100,6 @@ const onLogin = async () => {
     toast.error('Credentials not valid');
     return;
   }
-
-  console.log({ ok });
 };
 
 watchEffect(() => {
